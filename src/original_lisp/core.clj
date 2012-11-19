@@ -1,5 +1,9 @@
 (ns original-lisp.core)
 
+; TODO A nasty hack to circumvent the circular dependency. What's the official way to handle this?
+(def l-evcon)
+(def l-evlis)
+
 (defn atom? [x]
   (or (not (seq? x))
       (empty? x)))
