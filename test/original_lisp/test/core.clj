@@ -2,6 +2,11 @@
   (:use clojure.test
         original-lisp.core))
 
+(deftest atom?-test
+  (is (atom? 'a))
+  (is (atom? '()))
+  (is (not (atom? '(1 2 3)))))
+
 (deftest atom-test
   (is (= (l-eval 'a {'a 5})
          5)))

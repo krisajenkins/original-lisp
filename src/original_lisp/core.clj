@@ -1,7 +1,8 @@
 (ns original-lisp.core)
 
 (defn atom? [x]
-  (not (seq? x)))
+  (or (not (seq? x))
+      (empty? x)))
 
 (defn l-eval [expr env]
   (cond
