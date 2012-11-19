@@ -14,26 +14,10 @@
                            (= (first expr) 'car) (first (l-eval (first (rest expr)) env))
                            (= (first expr) 'cdr) (rest (l-eval (first (rest expr)) env))
                            (= (first expr) 'cons) (cons (l-eval (first (rest expr)) env)
-                                                        (l-eval (first (rest (rest expr))) env)
-                                                        )
-                           )
-    )
-  )
-
-(l-eval '(quote (this that)) {'this 'five 'that 'ten})
-(l-eval '(car (this that)) {'this 'five 'that 'ten})
-
-(l-eval '(car ((quote this) (quote that))) {'this 'five 'that 'ten})
-(l-eval '(car (this that)) {'this 'five 'that 'ten})
-
-(l-eval '(car ((quote this) (quote that))) {'this 'five 'that 'ten})
-(first (first (rest '(car (this that)))))
-
+                                                        (l-eval (first (rest (rest expr))) env)))))
 
 (defn l-evcon [c a]
-
   )
 
 (defn l-evlis [m a]
-
   )
