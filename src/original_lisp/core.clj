@@ -1,7 +1,7 @@
 (ns original-lisp.core)
 
 ; TODO A nasty hack to circumvent the circular dependency. What's the official way to handle this?
-(def l-evcon)
+(def l-evcond)
 (def l-evlis)
 
 (defn atom? [x]
@@ -46,7 +46,7 @@
                            (= (first expr) 'cdr)   (rest (l-eval (second expr) env))
                            (= (first expr) 'cons)  (cons (l-eval (second expr) env)
                                                          (l-eval (third expr) env))
-                           (= (first expr) 'cond)  (l-evcon (rest expr) env)
+                           (= (first expr) 'cond)  (l-evcond (rest expr) env)
                            :else                   (l-eval (cons (l-assoc (first expr) env)
                                                                  (rest expr))
                                                            env))
@@ -62,7 +62,7 @@
                                                              (l-evlis (rest expr) env))
                                                        env)))))
 
-(defn l-evcon [[condition & conditions] env]
+(defn l-evcond [[condition & conditions] env]
   (cond
     (l-eval (first condition) env) (l-eval (second condition) env)
     :else (recur conditions env)))
