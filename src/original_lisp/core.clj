@@ -20,12 +20,17 @@
 ; Some aliases.
 (def append concat)
 
-; NOTE - There seems to be a bug in Graham's paper. His version of assoc does not allow for x-not-found.
+(defn third [x]
+  (second (rest x)))
+
+; NOTE - There seems to be a bug in Graham's paper. His version of assoc does
+;   not allow for x-not-found. (Though it could be that I just don't understand
+;   Common Lisp's cond).
 (defn l-assoc
   [x ys]
   (cond
-    (= x (first (first ys))) (first (rest (first ys)))
     (empty? ys) nil
+    (= x (first (first ys))) (second (first ys))
     :else (recur x (rest ys))))
 
 (defn l-eval [expr env]
@@ -33,32 +38,34 @@
     (atom? expr) (l-assoc expr env)
 
     (atom? (first expr)) (cond
-                           (= (first expr) 'quote) (first (rest expr))
-                           (= (first expr) 'atom)  (atom? (l-eval (first (rest expr)) env))
-                           (= (first expr) 'eq)    (= (l-eval (first (rest expr)) env)
-                                                      (l-eval (first (rest (rest expr))) env))
-                           (= (first expr) 'car)   (first (l-eval (first (rest expr)) env))
-                           (= (first expr) 'cdr)   (rest (l-eval (first (rest expr)) env))
-                           (= (first expr) 'cons)  (cons (l-eval (first (rest expr)) env)
-                                                         (l-eval (first (rest (rest expr))) env))
+                           (= (first expr) 'quote) (second expr)
+                           (= (first expr) 'atom)  (atom? (l-eval (second expr) env))
+                           (= (first expr) 'eq)    (= (l-eval (second expr) env)
+                                                      (l-eval (third expr) env))
+                           (= (first expr) 'car)   (first (l-eval (second expr) env))
+                           (= (first expr) 'cdr)   (rest (l-eval (second expr) env))
+                           (= (first expr) 'cons)  (cons (l-eval (second expr) env)
+                                                         (l-eval (third expr) env))
                            (= (first expr) 'cond)  (l-evcon (rest expr) env)
-                           :else                   (l-eval (cons (l-assoc (first expr) env) (rest expr))
+                           :else                   (l-eval (cons (l-assoc (first expr) env)
+                                                                 (rest expr))
                                                            env))
 
-    (= (first (first expr)) 'label)  (l-eval (cons (first (rest (rest (first expr))))
+    (= (first (first expr)) 'label)  (l-eval (cons (third (first expr))
                                                    (rest expr))
-                                             (cons (list (first (rest (first expr)))
+                                             (cons (list (second (first expr))
                                                          (first expr))
                                                    env))
 
-    (= (first (first expr)) 'lambda) (l-eval (first (rest (rest (first expr))))
-                                             (append (pair (first (rest (first expr))) (l-evlis (rest expr) env))
+    (= (first (first expr)) 'lambda) (l-eval (third (first expr))
+                                             (append (pair (second (first expr))
+                                                           (l-evlis (rest expr) env))
                                                      env))))
 
-(defn l-evcon [condition env]
+(defn l-evcon [[condition & conditions] env]
   (cond
-    (l-eval (first (first condition)) env) (l-eval (first (rest (first condition))) env)
-    :else (recur (rest condition) env)))
+    (l-eval (first condition) env) (l-eval (second condition) env)
+    :else (recur conditions env)))
 
 (defn l-evlis [m env]
   (cond
