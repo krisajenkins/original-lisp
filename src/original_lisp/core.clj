@@ -51,16 +51,16 @@
                                                                  (rest expr))
                                                            env))
 
-    (= (first (first expr)) 'label)  (l-eval (cons (third (first expr))
-                                                   (rest expr))
-                                             (cons (list (second (first expr))
-                                                         (first expr))
-                                                   env))
+    (= (first (first expr)) 'label)  (let [[_ expr-name sub-expr] (first expr)]
+                                       (l-eval (cons sub-expr (rest expr))
+                                               (cons (list expr-name (first expr))
+                                                     env)))
 
-    (= (first (first expr)) 'lambda) (l-eval (third (first expr))
-                                             (append (pair (second (first expr))
-                                                           (l-evlis (rest expr) env))
-                                                     env))))
+    (= (first (first expr)) 'lambda) (let [[_ bindings sub-expr] (first expr)]
+                                       (l-eval sub-expr
+                                               (append (pair bindings
+                                                             (l-evlis (rest expr) env))
+                                                       env)))))
 
 (defn l-evcon [[condition & conditions] env]
   (cond
