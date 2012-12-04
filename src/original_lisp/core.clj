@@ -63,12 +63,12 @@
                                                        env)))))
 
 (defn l-evcond [[condition & conditions] env]
-  (cond
-    (l-eval (first condition) env) (l-eval (second condition) env)
-    :else (recur conditions env)))
+  (if (l-eval (first condition) env)
+    (l-eval (second condition) env)
+    (recur conditions env)))
 
 (defn l-evlis [m env]
-  (cond
-    (null? m) '()
-    :else (cons (l-eval (first m) env)
-                (l-evlis (rest m) env))))
+  (if (null? m)
+    '()
+    (cons (l-eval (first m) env)
+          (l-evlis (rest m) env))))
