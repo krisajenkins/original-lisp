@@ -37,30 +37,31 @@
   (cond
     (atom? expr) (l-assoc expr env)
 
-    (atom? (first expr)) (cond
-                           (= (first expr) 'quote) (second expr)
-                           (= (first expr) 'atom)  (atom? (l-eval (second expr) env))
-                           (= (first expr) 'eq)    (= (l-eval (second expr) env)
-                                                      (l-eval (third expr) env))
-                           (= (first expr) 'car)   (first (l-eval (second expr) env))
-                           (= (first expr) 'cdr)   (rest (l-eval (second expr) env))
-                           (= (first expr) 'cons)  (cons (l-eval (second expr) env)
-                                                         (l-eval (third expr) env))
-                           (= (first expr) 'cond)  (l-evcond (rest expr) env)
-                           :else                   (l-eval (cons (l-assoc (first expr) env)
-                                                                 (rest expr))
-                                                           env))
+    (atom? (first expr)) (case (first expr)
+                           quote  (second expr)
+                           atom   (atom? (l-eval (second expr) env))
+                           car    (first (l-eval (second expr) env))
+                           cdr    (rest (l-eval (second expr) env))
+                           cond   (l-evcond (rest expr) env)
+                           cons   (cons (l-eval (second expr) env)
+                                        (l-eval (third expr) env))
+                           eq     (= (l-eval (second expr) env)
+                                     (l-eval (third expr) env))
+                           (l-eval (cons (l-assoc (first expr) env)
+                                         (rest expr))
+                                   env))
 
-    (= (first (first expr)) 'label)  (let [[_ expr-name sub-expr] (first expr)]
-                                       (l-eval (cons sub-expr (rest expr))
-                                               (cons (list expr-name (first expr))
-                                                     env)))
+    :else (case (first (first expr))
+            label (let [[_ expr-name sub-expr] (first expr)]
+                    (l-eval (cons sub-expr (rest expr))
+                            (cons (list expr-name (first expr))
+                                  env)))
 
-    (= (first (first expr)) 'lambda) (let [[_ bindings sub-expr] (first expr)]
-                                       (l-eval sub-expr
-                                               (append (pair bindings
-                                                             (l-evlis (rest expr) env))
-                                                       env)))))
+            lambda (let [[_ bindings sub-expr] (first expr)]
+                     (l-eval sub-expr
+                             (append (pair bindings
+                                           (l-evlis (rest expr) env))
+                                     env))))))
 
 (defn l-evcond [[condition & conditions] env]
   (if (l-eval (first condition) env)
