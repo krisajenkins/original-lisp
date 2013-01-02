@@ -29,9 +29,7 @@
     (= x (first (first ys))) (second (first ys))
     :else (recur x (rest ys))))
 
-; TODO A nasty hack to circumvent the circular dependency. What's the official way to handle this?
-(def l-evcond)
-(def l-evlis)
+(declare l-evcond l-evlis)
 
 (defn l-eval [expr env]
   (cond
